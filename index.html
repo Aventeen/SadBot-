@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SadBot AI Mixtral</title>
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: 'Courier New', monospace;
+      padding: 15px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+    #chatbox {
+      background: #010101;
+      border: 1px solid #00FF00;
+      border-radius: 5px;
+      padding: 10px;
+      min-height: 200px;
+      max-height: 60vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+    }
+    .user {
+      color: #00FF00;
+    }
+    .bot {
+      color: red;
+    }
+    input[type="text"] {
+      width: 68%;
+      padding: 10px;
+      font-size: 16px;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      outline: none;
+    }
+    button {
+      width: 30%;
+      padding: 10px;
+      background-color: #00FF00;
+      color: #000;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00cc00;
+    }
+  </style>
+</head>
+<body>
+  <h2>SadBot AI Mixtral [mode: hacker]</h2>
+  <div id="chatbox">SadBot: <span class="bot">[aktif dan siap menjawab dalam bahasa Indonesia]</span></div>
+  <input type="text" id="pesan" placeholder="Tulis pesan...">
+  <button onclick="kirim()">Kirim</button>
 
+  <script>
+    async function kirim() {
+      const input = document.getElementById("pesan");
+      const chatbox = document.getElementById("chatbox");
+      const teks = input.value.trim();
+      if (!teks) return;
+
+      // Tampilkan pertanyaan lo dan status "Mengetik..."
+      chatbox.innerHTML += `\n<span class="user">Lo:</span> ${teks}`;
+      chatbox.innerHTML += `\n<span class="bot">SadBot: [mengetik...]</span>`;
+      input.value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      try {
+        if (typeof puter === "undefined" || !puter.ai || !puter.ai.chat) {
+          throw new Error("Puter.js belum siap");
+        }
+
+        const prompt = `Jawab dalam bahasa Indonesia:\n${teks}`;
+        const balasan = await puter.ai.chat(prompt);
+
+        // Ganti "[mengetik...]" jadi jawaban asli
+        chatbox.innerHTML = chatbox.innerHTML.replace(/\[mengetik...\]/, balasan);
+      } catch (err) {
+        chatbox.innerHTML = chatbox.innerHTML.replace(/\[mengetik...\]/, `gagal: ${err.message}`);
+      }
+
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
