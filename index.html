@@ -6,11 +6,6 @@
   <title>SadBot AI Mixtral</title>
   <script src="https://js.puter.com/v2/"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
     body {
       background-color: #000;
       color: #0f0;
@@ -19,7 +14,6 @@
     }
     h2 {
       margin-bottom: 10px;
-      font-size: 22px;
     }
     #chatbox {
       background: #010101;
@@ -38,61 +32,91 @@
     .bot {
       color: red;
     }
-    input[type="text"] {
-      width: 68%;
-      padding: 10px;
+    input, select, button {
       font-size: 16px;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    input {
+      width: 60%;
       background: #111;
       color: #0f0;
       border: 1px solid #0f0;
-      outline: none;
+    }
+    select {
+      width: 38%;
+      background: #000;
+      color: lime;
+      border: 1px solid lime;
     }
     button {
-      width: 30%;
-      padding: 10px;
+      width: 100%;
       background-color: #00FF00;
       color: #000;
       border: none;
       font-weight: bold;
-      font-size: 16px;
       cursor: pointer;
-    }
-    button:hover {
-      background-color: #00cc00;
     }
   </style>
 </head>
 <body>
-  <h2>SadBot AI Mixtral [mode: hacker]</h2>
+  <h2>SadBot AI [Tanpa API Key] 💬</h2>
   <div id="chatbox">SadBot: <span class="bot">[aktif dan siap menjawab dalam bahasa Indonesia]</span></div>
-  <input type="text" id="pesan" placeholder="Tulis pesan...">
+
+  <input type="text" id="pesan" placeholder="Tulis pertanyaan...">
+  <select id="model">
+    <option value="Mixtral">🧠 Mixtral (simulasi)</option>
+    <option value="GPT-3.5">⚡ GPT-3.5 (simulasi)</option>
+    <option value="Claude">🧙 Claude (simulasi)</option>
+  </select>
   <button onclick="kirim()">Kirim</button>
 
   <script>
+    function cekWaktuLokal(teks) {
+      const now = new Date();
+      const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tanggal = now.toLocaleDateString('id-ID');
+      const jam = now.toLocaleTimeString('id-ID');
+
+      teks = teks.toLowerCase();
+      if (teks.includes("hari apa") || teks.includes("hari ini")) {
+        return `Sekarang hari ${hari}.`;
+      }
+      if (teks.includes("jam berapa") || teks.includes("pukul berapa")) {
+        return `Sekarang pukul ${jam}.`;
+      }
+      if (teks.includes("tanggal berapa")) {
+        return `Hari ini tanggal ${tanggal}.`;
+      }
+      return null;
+    }
+
     async function kirim() {
       const input = document.getElementById("pesan");
+      const model = document.getElementById("model").value;
       const chatbox = document.getElementById("chatbox");
       const teks = input.value.trim();
       if (!teks) return;
 
-      // Tampilkan pertanyaan lo dan status "Mengetik..."
-      chatbox.innerHTML += `\n<span class="user">Lo:</span> ${teks}`;
-      chatbox.innerHTML += `\n<span class="bot">SadBot: [mengetik...]</span>`;
+      chatbox.innerHTML += `\n<span class="user">Lo [${model}]:</span> ${teks}`;
       input.value = "";
+
+      const waktuJawaban = cekWaktuLokal(teks);
+      if (waktuJawaban) {
+        chatbox.innerHTML += `\n<span class="bot">SadBot: ${waktuJawaban}</span>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+        return;
+      }
+
+      chatbox.innerHTML += `\n<span class="bot">SadBot: [mengetik...]</span>`;
       chatbox.scrollTop = chatbox.scrollHeight;
 
       try {
-        if (typeof puter === "undefined" || !puter.ai || !puter.ai.chat) {
-          throw new Error("Puter.js belum siap");
-        }
-
-        const prompt = `Jawab dalam bahasa Indonesia:\n${teks}`;
+        const prompt = `Gunakan gaya model ${model}. Jawab dalam bahasa Indonesia:\n${teks}`;
         const balasan = await puter.ai.chat(prompt);
-
-        // Ganti "[mengetik...]" jadi jawaban asli
-        chatbox.innerHTML = chatbox.innerHTML.replace(/\[mengetik...\]/, balasan);
+        chatbox.innerHTML = chatbox.innerHTML.replace('[mengetik...]', balasan);
       } catch (err) {
-        chatbox.innerHTML = chatbox.innerHTML.replace(/\[mengetik...\]/, `gagal: ${err.message}`);
+        chatbox.innerHTML = chatbox.innerHTML.replace('[mengetik...]', `Gagal: ${err.message}`);
       }
 
       chatbox.scrollTop = chatbox.scrollHeight;
