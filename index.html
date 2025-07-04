@@ -57,6 +57,17 @@
       font-weight: bold;
       cursor: pointer;
     }
+    .fade-out {
+      animation: fadeOut 1s forwards;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -71,7 +82,12 @@
   </select>
   <button onclick="kirim()">Kirim</button>
 
+  <!-- Pemutar audio tersembunyi -->
+  <audio id="music-player" style="display:none;"></audio>
+
   <script>
+    let lastMusicElement = null;
+
     function cekWaktuLokal(teks) {
       const now = new Date();
       const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
@@ -91,6 +107,75 @@
       return null;
     }
 
+    function cekMusik(teks) {
+      teks = teks.toLowerCase();
+
+      // ==== DAFTAR MUSIK BERDASARKAN NAMA ====
+      const daftarMusik = {
+        "musik": "merahjambu.mp3",
+        "hiphop": "hiphop.mp3",
+        "relax": "relax.mp3",
+        "epic": "epic.mp3",
+        "sad": "sad.mp3",
+        "energi": "energi.mp3",
+        "senja": "senja.mp3",
+        "malam": "malam.mp3",
+        "cerah": "cerah.mp3",
+        "galau": "galau.mp3",
+        "metal": "metal.mp3",
+        "jazz": "jazz.mp3",
+        "hujan": "hujan.mp3",
+        "pagi": "pagi.mp3",
+        "malam minggu": "malam_minggu.mp3",
+        "bahagia": "bahagia.mp3",
+        "game": "game.mp3",
+        "anime": "anime.mp3",
+        "remix": "remix.mp3",
+        "klasik": "klasik.mp3"
+      };
+
+      if (teks.includes("stop musik")) {
+        stopMusik();
+        return "Musik dihentikan.";
+      }
+
+      for (const nama in daftarMusik) {
+        if (teks.includes(nama)) {
+          putarMusik(daftarMusik[nama]);
+          return `Memutar musik: ${nama}`;
+        }
+      }
+
+      return null;
+    }
+
+    function putarMusik(file) {
+      const player = document.getElementById("music-player");
+      player.src = file;
+      player.play();
+
+      const chatbox = document.getElementById("chatbox");
+      const ele = document.createElement("div");
+      ele.className = "bot music-message";
+      ele.innerText = `SadBot: 🎵 Sedang memutar ${file}`;
+      chatbox.appendChild(ele);
+      chatbox.scrollTop = chatbox.scrollHeight;
+
+      lastMusicElement = ele;
+    }
+
+    function stopMusik() {
+      const player = document.getElementById("music-player");
+      player.pause();
+      player.currentTime = 0;
+
+      if (lastMusicElement) {
+        lastMusicElement.classList.add("fade-out");
+        setTimeout(() => lastMusicElement.remove(), 1000);
+        lastMusicElement = null;
+      }
+    }
+
     async function kirim() {
       const input = document.getElementById("pesan");
       const model = document.getElementById("model").value;
@@ -104,6 +189,13 @@
       const waktuJawaban = cekWaktuLokal(teks);
       if (waktuJawaban) {
         chatbox.innerHTML += `\n<span class="bot">SadBot: ${waktuJawaban}</span>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+        return;
+      }
+
+      const musikJawaban = cekMusik(teks);
+      if (musikJawaban) {
+        chatbox.innerHTML += `\n<span class="bot">SadBot: ${musikJawaban}</span>`;
         chatbox.scrollTop = chatbox.scrollHeight;
         return;
       }
